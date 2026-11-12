@@ -29,7 +29,7 @@ tokens/           Nexora design tokens
 utils/            shared component utilities
 ```
 
-The repository has no approved Nexora mockup or source palette yet. Brand values and screen-specific components should be added when that source is available; this scaffold intentionally does not define substitute brand colors.
+The repository has no approved Nexora mockup or source palette yet. The shared stylesheet currently provides neutral semantic defaults to exercise light/dark behavior and shadcn primitives. Replace them with the approved Nexora values when that source is available; these defaults are not brand colors.
 
 ## Dependency policy
 

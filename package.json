@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "npm run dev --workspace @nexora/web",
-    "build": "npm run build --workspace @nexora/web",
-    "typecheck": "npm run typecheck --workspace @nexora/web"
+    "build": "npm run typecheck --workspace @nexora/ui && npm run build --workspace @nexora/web",
+    "typecheck": "npm run typecheck --workspace @nexora/ui && npm run typecheck --workspace @nexora/web"
   }
 }

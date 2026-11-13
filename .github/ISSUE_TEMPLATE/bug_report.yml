@@ -1,0 +1,38 @@
+name: Bug Report
+description: Report a reproducible issue in Nexora
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for reporting a problem. Please do not include credentials or sensitive data."
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What went wrong?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open ...\n2. Click ...\n3. Observe ..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, and relevant versions
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Sanitized logs or screenshots

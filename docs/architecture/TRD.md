@@ -30,18 +30,18 @@ En Docker Compose: `web`, `api`, `worker`, `landings`, `mongodb`, `redis`, `ngin
 
 ### Versiones y compatibilidad
 
-La tabla siguiente fija líneas mayores propuestas para reducir ambigüedad; el patch final se fijará en Fase 1 con lockfile e imagen, tras comprobación de compatibilidad/advisories. La base web inspeccionada localmente es: React/react-dom 19.3.1, Vite 8.3.8, plugin React 6.3.0, TypeScript 7.0.2, Tailwind 4.3.5, shadcn CLI 4.23.0, Base UI 1.9.0, Motion 14.12.0, Inter Variable 5.3.0. El README registra Node mínimo 20.19+/22.12+ para plugin/Vite; Node 24 LTS satisface ese baseline propuesto. `npm` workspaces ya existe y el Master Prompt pide pnpm/Turborepo: migración pendiente de aprobación/documentación. MongoDB debe desplegarse como replica set si se necesitan transacciones multi-documento. Redis 8 estable satisface la base Redis ≥6.2 documentada por BullMQ.
+La base del repositorio inspeccionada para Fase 0 era React/react-dom 19.3.1, Vite 8.3.8, plugin React 6.3.0, TypeScript 7.0.2, Tailwind 4.3.5, shadcn CLI 4.23.0, Base UI 1.9.0, Motion 14.12.0, Inter Variable 5.3.0. Fase 1 migró el workspace a pnpm 12.11.2/Turborepo 2.11.11, instaló el lockfile y fijó los paquetes concretos en `pnpm-lock.yaml`. MongoDB corre como replica set autenticado para soportar transacciones; el keyfile se genera desde `.env` ignorado. Redis requiere contraseña y queda solo en la red privada.
 
 | Tecnología solicitada | Decisión/uso | Compatibilidad y condición |
 |---|---|---|
 | React | SPA interna y editor | 19.3.1 presente; verificar compatibilidad de cada paquete |
 | Vite | bundle/dev de `apps/web` | 8.3.8 presente; Node soportado arriba |
 | TypeScript | strict en apps/paquetes | 7.0.2 presente; fijar compilador de servidor compatible |
-| Node.js | API/worker/build | **Propuesta: 24.22.x LTS**; línea madura compatible con mínimo Vite/plugin registrado; fijar patch de imagen/engines al implementar. La rama 26 acaba de entrar en LTS, así que no se adopta como baseline inicial. |
-| Express | API `/api/v1` | **5.x**; línea mantenida; usar middleware compatible con Node 24. |
-| MongoDB/Mongoose | persistencia documental | **MongoDB 8.0.x** (línea estable, evitar rapid release) + Mongoose compatible verificado al fijar lock; replica set si transacciones. |
-| Redis/BullMQ | colas, locks, límites | **Redis OSS 8.x** estable (no RC) + **BullMQ 6.x**; BullMQ actual documenta Redis ≥6.2. Fijar patch y persistencia/eviction segura. |
-| Next.js | renderer de landing controlado | **16.4.x** propuesta, con React 19.3; verificar Node 24/build/standalone y seguridad antes de pin. Aplicación separada. |
+| Node.js | API/worker/build | **24.22.x LTS**; build verificado con Node 24.22.3. |
+| Express | API `/api/v1` | **5.1.x**; Node 24 y TypeScript strict. |
+| MongoDB/Mongoose | persistencia documental | **MongoDB 7.0.48** en Docker (release oficial del 2026-11-11); se elige 7.0 por compatibilidad del kernel Linux 6.19 de desarrollo local con TCMalloc de MongoDB 8.0+. Mongoose compatible fijado en lock; replica set para transacciones. Reevaluar 8.0 cuando MongoDB publique una build compatible con este kernel. |
+| Redis/BullMQ | colas, locks, límites | **Redis OSS 8.0-alpine** + **BullMQ 6.x**; Redis requiere clave y queda solo en red privada. |
+| Next.js | renderer de landing controlado | **16.4.6**, React 19 y TypeScript 7; build optimizado verificado. Aplicación separada. |
 | Tailwind CSS | tokens y layout | v4.3.5 presente, plugin Vite instalado |
 | shadcn/ui | fuente de primitives | usar componentes Base UI ya configurados; accesibilidad y licencia por componente |
 | HeroUI | uso puntual | opcional, solo ante gap demostrable y coherencia React 19 |
@@ -50,7 +50,7 @@ La tabla siguiente fija líneas mayores propuestas para reducir ambigüedad; el 
 | InteraUI / Animate | sin decisión de paquete | nombres ambiguos; verificar oficial, licencia, mantenimiento, compatibilidad; no instalar hasta identificación inequívoca |
 | Docker / Compose | dev y prod controlados | Docker Engine compatible y Compose **v2**; fijar versiones/imágenes por digest en release, healthchecks, usuario no-root y secretos externos |
 | Nginx | TLS/routing/headers | **1.30.x stable** propuesta; proxy a servicios internos; configurar tamaño/timeouts/CSP/cache |
-| pnpm / Turborepo | monorepo | **pnpm 10.x + Turborepo 2.x** propuestos si se ratifica DG-02; un solo lockfile/workspace graph |
+| pnpm / Turborepo | monorepo | **pnpm 12.11.2 + Turborepo 2.x** propuestos; pnpm 12.11.2 está disponible en el entorno de trabajo. Un solo lockfile/workspace graph |
 
 ## 3. Organización de código prevista
 
@@ -64,7 +64,7 @@ La tabla siguiente fija líneas mayores propuestas para reducir ambigüedad; el 
 
 ### ADR-002 — Monorepo y package manager
 
-**Estado:** pendiente de confirmación. El repo ya usa npm workspaces; Master Prompt requiere pnpm + Turborepo. Propuesta: migrar a pnpm workspaces + Turborepo al comenzar Fase 1 para caching y orquestación de apps, conservando cambios existentes y un único lockfile. No mantener dos gestores. Aceptación exige build/typecheck reproducibles por workspace.
+**Estado:** aprobado por el propietario el 2026-11-12. El repo migra de npm workspaces a pnpm workspaces + Turborepo para caching y orquestación de apps, conservando el código existente y un único lockfile. Se fija `pnpm@12.11.2` (disponible en el entorno) y línea Turborepo 2.x, con resolución exacta en lockfile. No mantener dos gestores. Aceptación exige build/typecheck reproducibles por workspace.
 
 ### ADR-003 — Sesiones
 
@@ -141,7 +141,7 @@ Activos: credenciales/sesiones, tokens Gmail/API, leads/contactos, material de c
 | Mantenibilidad | strict TS, OpenAPI, schemas compartidos cuando apropiado, ownership modular y lockfile reproducible |
 | Coste | presupuesto máximo por proveedor configurable; estimación/preflight y alertas; límites duros para IA/discovery configurables |
 
-Todos son objetivos de diseño; ninguno se declara alcanzado. Costes monetarios y disponibilidad dependen de proveedores/hosting elegidos y aún no se cuantifican. Las versiones propuestas para servidor se consultaron en documentación/release pages oficiales el 2026-11-12: [Node.js releases](https://nodejs.org/en/about/previous-releases), [Express support](https://expressjs.com/en/support/), [MongoDB 8.0 release notes](https://www.mongodb.com/docs/v8.0/release-notes/8.0/), [Next.js blog](https://nextjs.org/blog), [Redis Open Source](https://redis.io/docs/latest/operate/oss_and_stack/), [BullMQ changelog](https://docs.bullmq.io/changelog), [Nginx downloads](https://nginx.org/en/download.html). Las versiones son propuesta documental, no instalación ejecutada; al empezar Fase 1 se verifica patch, compatibilidad completa y advisories, y se fija lock/image digest.
+Todos son objetivos de diseño; ninguno se declara alcanzado. Costes monetarios y disponibilidad dependen de proveedores/hosting elegidos y aún no se cuantifican. MongoDB publicó que los kernels 6.19–7.0.13 son incompatibles con TCMalloc en su línea 8.0; este host usa kernel 6.19, por eso desarrollo local usa MongoDB 7.0.48. Fuentes oficiales consultadas el 2026-11-13: [Node.js releases](https://nodejs.org/en/about/previous-releases), [Express support](https://expressjs.com/en/support/), [MongoDB 8.0 release notes](https://www.mongodb.com/docs/v8.0/release-notes/8.0/), [MongoDB 7.0.48 release notes](https://www.mongodb.com/docs/v7.0/release-notes/7.0/), [Next.js blog](https://nextjs.org/blog), [Redis Open Source](https://redis.io/docs/latest/operate/oss_and_stack/), [BullMQ changelog](https://docs.bullmq.io/changelog), [Nginx downloads](https://nginx.org/en/download.html). Las versiones propuestas se verifican contra el lockfile, builds y advisories antes de declarar esta fase cerrada.
 
 ## 7. Observabilidad, datos y contratos externos
 
@@ -158,6 +158,6 @@ Contratos en Schema/API: Google Places solo campos autorizados y atribución req
 5. Scope amplio → fases con acceptance y MVP por vertical, no activar módulos antes de auth/data/contracts.
 6. Diseño de marca aún no aprobado → conservar tokens actuales como scaffolding; aplicar paleta Master Prompt solo tras confirmar referencia.
 
-## 9. Decisiones de propietario requeridas antes de Fase 1
+## 9. Decisiones confirmadas para Fase 1
 
-Confirmar: (1) Master Prompt como fuente aprobada para EE. UU., USD, servicios web locales, roles Admin/Operator y precios iniciales editables; (2) migrar npm workspaces a pnpm + Turborepo; (3) aprobar paleta/logotipo descritos o aportar referencia gráfica; (4) política de una organización interna con preparación de aislamiento multi-org. Esto no bloquea terminar Fase 0 ni definir diseño técnico; sí bloquea implementación de decisiones irreversibles/visibles.
+El propietario aprobó el 2026-11-12: (1) EE. UU., USD, servicios web locales, roles Admin/Operator y precios editables como alcance inicial; (2) migrar npm workspaces a pnpm + Turborepo; (3) adoptar como dirección visual la paleta/logotipo descritos, aplicando tokens accesibles; (4) operar una organización interna en MVP y preparar aislamiento multi-org. La referencia gráfica final podrá sustituir la dirección del logo mediante actualización documentada.

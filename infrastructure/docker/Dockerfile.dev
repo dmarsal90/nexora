@@ -1,0 +1,6 @@
+FROM node:24-bookworm-slim
+
+WORKDIR /workspace
+RUN corepack enable
+USER node
+CMD ["node", "--version"]

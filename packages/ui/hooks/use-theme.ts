@@ -33,13 +33,14 @@ export function useTheme() {
     } else {
       root.dataset.theme = preference
     }
+    root.classList.toggle('dark', theme === 'dark')
 
     try {
       window.localStorage.setItem(storageKey, preference)
     } catch {
       // Keep the current session theme when storage is unavailable.
     }
-  }, [preference])
+  }, [preference, theme])
 
   useEffect(() => {
     const media = window.matchMedia(colorSchemeQuery)

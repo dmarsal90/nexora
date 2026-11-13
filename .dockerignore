@@ -1,0 +1,17 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+node_modules
+**/node_modules
+.turbo
+**/.turbo
+.next
+**/.next
+dist
+**/dist
+coverage
+**/coverage
+*.log
+pnpm-debug.log*

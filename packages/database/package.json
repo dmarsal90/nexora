@@ -1,0 +1,20 @@
+{
+  "name": "@nexora/database",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --target node24 --out-dir dist --clean",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "mongoose": "^8.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,23 +1,28 @@
 # Nexora — Backend Schema and API Contracts
 
-**Versión:** 1.0 · propuesta para aprobación · 2026-11-12
+**Versión:** 1.1 · baseline Fase 1 · 2026-11-13
 
 ## 1. Convenciones y protección de datos
 
-MongoDB/Mongoose, UUID/ULID string IDs (elegir una convención única en Fase 1; propuesta UUIDv7), UTC timestamps, `createdAt`/`updatedAt`, optimistic `version`, `organizationId` obligatorio en datos comerciales. Todas las consultas por org se aplican en repository/policy. Campos siguientes son diseño, no modelos implementados.
+MongoDB/Mongoose, BSON ObjectId para colecciones Mongoose de Foundation; IDs string que exponga la API se serializan de manera uniforme. UTC timestamps, `createdAt`/`updatedAt`, optimistic `version`, `organizationId` obligatorio en datos comerciales. Todas las consultas por org se aplican en repository/policy. El resto de los modelos de producto que aparecen abajo son diseño para fases futuras.
 
 Convención de borrado: identidad y recursos con historial usan `archivedAt`/`deletedAt` según dominio; secretos/archivos tienen borrado efectivo y revocación; AuditLog append-only con retención definida; referencias temporales de proveedor expiran. `sourceRefs` identifica proveedor, campo, fecha, autorización/retention class; no copiar payload externo sin revisar permiso. PII de contacto minimizada. Timestamps de fuente no sustituyen timestamps del registro.
 
 ## 2. Modelos
 
-Tipos comunes: `Id=UUID string`, `Date=UTC`, `Money={amountMinor:int,currency:'USD'}`, `Ref<T>=Id`, `OrgDoc` incluye `_id, organizationId, createdAt, updatedAt, version`. Campos indicados `?` opcionales; campos privados se omiten en serialización.
+Tipos comunes: `Id=ObjectId` persistido y string en DTO, `Date=UTC`, `Money={amountMinor:int,currency:'USD'}`, `Ref<T>=Id`, `OrgDoc` incluye `_id, organizationId, createdAt, updatedAt, version`. Campos indicados `?` opcionales; campos privados se omiten en serialización.
+
+### Modelos implementados en Foundation
+
+Mongoose implementa `Organization`, `User`, `Membership`, `Session`, `AuthChallenge` y `AuditLog`. Las sesiones guardan hashes opacos, expiración e invalidación; el material TOTP se cifra con `ENCRYPTION_KEY`; los documentos AuditLog se escriben por la API y se consultan con scope de organización. Las demás entidades se incorporarán con sus respectivas fases y no se consideran disponibles por existir en este diseño.
 
 | Modelo | Propósito, campos y validación | Índices/relaciones, seguridad y eliminación |
 |---|---|---|
 | User | identidad: email normalizado único global, displayName, passwordHash Argon2id, locale `en/es`, status `invited/active/disabled`, mfa `{enabled,secretCiphertext,recoveryCodeHashes}`, lastLoginAt | índice unique email; no devolver hash/secret; baja conserva referencia auditada, anonimización según política |
 | Organization | tenant interno: name, slug, status, defaultLocale, timezone, currency `USD`, settingsRef | slug unique; retención/ajustes; soft archive; no onboarding público |
 | Membership | userId, organizationId, role `admin/operator`, status `invited/active/suspended`, invitation `{tokenHash,expiresAt,acceptedAt}`, invitedBy | unique `(organizationId,userId)`; token one-use hash; último Admin protegido; revocación |
-| Session | userId, organizationId, tokenHash, csrfHash, createdAt, lastSeenAt, expiresAt, revokedAt, ipHash?, userAgentSummary? | tokenHash unique, TTL expiresAt; jamás valor cookie; borrar al vencer/revocar |
+| Session | userId, organizationId, tokenHash, csrfHash, csrfCiphertext, createdAt, lastSeenAt, expiresAt, revokedAt, ipHash?, userAgentSummary? | tokenHash unique, TTL expiresAt; token de sesión nunca almacenado; CSRF token cifrado para poder rehidratar UI y hash validado; borrar al vencer/revocar |
+| AuthChallenge | userId, organizationId, tokenHash, purpose `login/mfa_enroll/password_reset`, secretCiphertext? (solo enrollment), expiresAt, consumedAt?, attempts | tokenHash unique, TTL expiresAt; límite de intentos; secreto MFA cifrado temporal hasta verificación; borrar al consumir/vencer |
 | IntegrationConnection | organizationId, provider `google_places/gmail/openai/pagespeed/s3/smtp`, accountLabel, scopes, status, credentialCiphertext/keyVersion, connectedBy, checkedAt, revokedAt | unique org/provider/account; secretos cifrados y excluidos DTO/log; revocar y borrar ciphertext |
 | BusinessReference | observación/candidato de fuente: provider, providerId?, sourceRefs, businessName, category?, location?, websiteDeclared?, fetchedAt, expiresAt, rawPayload? (solo si contract permite) | índice `(org,provider,providerId)` parcial; TTL para snapshots permitidos; datos Google temporales salvo permiso explícito |
 | Lead | first-party CRM record: name, category?, address `{city,state,postalCode,country}`, website?, websiteStatus enum, ownerId?, lifecycle `active/archived`, stage ref, scoreRef?, tags[], notesSummary?, sourceRefs[], customerId? | índices org+name, org+city+category, org+stage+updatedAt; dedupe con clave normalizada y resolución humana; archivar, borrar bajo política |

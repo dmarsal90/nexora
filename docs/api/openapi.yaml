@@ -1,0 +1,121 @@
+openapi: 3.1.0
+info:
+  title: Nexora API
+  version: 1.0.0
+  description: Private, organization-scoped API. All protected routes require an active session.
+servers:
+  - url: /api/v1
+paths:
+  /health/live:
+    get:
+      summary: Process liveness
+      responses:
+        '200':
+          description: Process is running
+  /health/ready:
+    get:
+      summary: Dependency readiness
+      responses:
+        '200': { description: MongoDB and Redis are ready }
+        '503': { description: A required dependency is unavailable }
+  /auth/login:
+    post:
+      summary: Authenticate with password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, maxLength: 254 }
+                password: { type: string, minLength: 1, maxLength: 200 }
+      responses:
+        '200': { description: Session established for a non-MFA account }
+        '202': { description: Administrator or MFA account must complete a short-lived TOTP challenge }
+        '400': { description: Invalid request }
+        '401': { description: Invalid credentials }
+        '429': { description: Sign-in rate limit reached }
+  /auth/mfa/setup:
+    post:
+      summary: Obtain a one-time TOTP enrollment secret for an authenticated password challenge
+      responses:
+        '200': { description: Short-lived TOTP setup material }
+        '401': { description: Invalid or expired challenge }
+  /auth/mfa/verify:
+    post:
+      summary: Verify TOTP and establish session
+      responses:
+        '200': { description: Session cookie set and CSRF token returned }
+        '401': { description: Invalid or expired challenge/code }
+  /auth/me:
+    get:
+      summary: Current user and CSRF token
+      security: [{ cookieSession: [] }]
+      responses:
+        '200': { description: Current user identity }
+        '401': { description: No active session }
+  /auth/logout:
+    post:
+      summary: Revoke current session
+      security: [{ cookieSession: [], csrf: [] }]
+      responses:
+        '200': { description: Session revoked }
+        '403': { description: CSRF token missing or invalid }
+  /organizations/current:
+    get:
+      summary: Current organization
+      security: [{ cookieSession: [] }]
+      responses:
+        '200': { description: Organization identity and non-sensitive settings }
+        '401': { description: No active session }
+  /dashboard/summary:
+    get:
+      summary: Current organization foundation activity
+      security: [{ cookieSession: [] }]
+      responses:
+        '200': { description: Actual member count and recent audit events; no synthetic commercial metrics }
+  /users:
+    get:
+      summary: List organization memberships (Admin)
+      security: [{ cookieSession: [] }]
+      responses:
+        '200': { description: User roster }
+        '403': { description: Admin role required }
+  /users/invitations:
+    post:
+      summary: Create a one-time invitation (Admin)
+      security: [{ cookieSession: [], csrf: [] }]
+      responses:
+        '201': { description: Invite link token returned once }
+        '403': { description: Admin role or CSRF token required }
+  /users/{userId}:
+    patch:
+      summary: Change membership role or suspend membership (Admin)
+      security: [{ cookieSession: [], csrf: [] }]
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Membership updated }
+        '409': { description: Last active Admin or state conflict }
+  /users/audit-logs:
+    get:
+      summary: Read organization audit events (Admin)
+      security: [{ cookieSession: [] }]
+      responses:
+        '200': { description: Redacted, read-only audit events }
+components:
+  securitySchemes:
+    cookieSession:
+      type: apiKey
+      in: cookie
+      name: nx_session
+    csrf:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token

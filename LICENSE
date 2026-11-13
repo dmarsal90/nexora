@@ -1,0 +1,27 @@
+NEXORA SOURCE-AVAILABLE LICENSE
+Copyright (c) 2026 David Marsal Ivars
+All rights reserved.
+
+1. Ownership
+Nexora's original source code and original documentation are proprietary works of the copyright holder. Third-party components remain governed by their respective licenses.
+
+2. Public visibility
+The source code may be made publicly viewable for inspection and evaluation. Public visibility does not grant a general license to use, reproduce, modify, redistribute, sublicense, sell, host, or create derivative works from Nexora.
+
+3. Permission
+Any use beyond rights provided by applicable law or GitHub's Terms of Service requires prior written authorization from the copyright holder.
+
+4. Issues and suggestions
+Bug reports and feature suggestions may be submitted through the repository's GitHub Issues. Submitting an issue does not grant permission to modify or redistribute Nexora. The maintainer may accept, reject, or defer suggestions at their discretion.
+
+5. Contributions
+Code contributions are not accepted by default. Anyone wishing to contribute code must obtain written authorization and agree on contribution terms before submitting it. No transfer of ownership is implied by submitting a suggestion.
+
+6. No warranty
+To the extent permitted by applicable law, the software is provided "AS IS", without warranties of any kind.
+
+7. Contact
+For licensing inquiries and permissions, contact:
+davidmarsalivars@gmail.com
+
+This notice does not override applicable law, third-party licenses, or rights granted by GitHub's Terms of Service.

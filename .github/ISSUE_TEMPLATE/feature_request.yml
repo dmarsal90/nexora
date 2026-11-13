@@ -1,0 +1,27 @@
+name: Feature Request
+description: Suggest an improvement for Nexora
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What problem should this feature solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the desired behavior
+    validations:
+      required: true
+  - type: textarea
+    id: benefits
+    attributes:
+      label: Expected benefits
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

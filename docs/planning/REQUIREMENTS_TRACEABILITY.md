@@ -1,15 +1,15 @@
 # Nexora — Requirements Traceability Matrix
 
-**Versión:** 1.0 · propuesta para aprobación · 2026-11-12
+**Versión:** 1.1 · baseline actualizado tras Fase 1 · 2026-11-13
 
-Status inicial de todas las filas: **Planificado**. La columna Test describe evidencia exigida; “Pendiente Fase N” no significa prueba ejecutada. API/schema se refiere a `docs/backend/BACKEND_SCHEMA.md`; los nombres de rutas son propuestos.
+Los requisitos de fases posteriores permanecen **Planificados**. Los estados Foundation distinguen implementación ejecutada de cobertura QA parcial. API/schema se refiere a `docs/backend/BACKEND_SCHEMA.md`.
 
 | Requirement ID | PRD Section | App Flow | UI Screen | API/Schema | Implementation Task | Test / aceptación verificable | Status |
 |---|---|---|---|---|---|---|---|
-| FR-AUTH-001 Login/MFA | Users & Roles | H | Login/MFA | auth, User, Session | TASK-AUTH-001 | unit Argon/TOTP; E2E login, MFA invalid/valid | Planificado |
-| FR-AUTH-002 Invitación/roles | Users & Roles | H | Users & Roles | Membership/User | TASK-AUTH-002 | operator admin endpoint 403; invite single-use | Planificado |
-| FR-ORG-001 aislamiento | restricciones/Users | H + todos | todas privadas | organizationId en OrgDoc | TASK-AUTH-002 | cross-org IDOR integration denies | Planificado |
-| FR-DASH-001 KPIs reales | Dashboard | navegación | Dashboard | Analytics/Activity/ApiUsage | TASK-FOUND-001, TASK-ANA-001 | reconcile API against fixtures; empty no fake | Planificado |
+| FR-AUTH-001 Login/MFA | Users & Roles | H | Login/MFA | auth, User, Session | TASK-AUTH-001 | Argon/TOTP tests; live login returns MFA enrollment challenge; valid/invalid MFA E2E pending | Parcial F1 |
+| FR-AUTH-002 Invitación/roles | Users & Roles | H | Users & Roles | Membership/User | TASK-AUTH-002 | Middleware Operator 403/Admin pass tested; invitation single-use integration pending | Parcial F1 |
+| FR-ORG-001 aislamiento | restricciones/Users | H + todos | todas privadas | organizationId en OrgDoc | TASK-AUTH-002 | User queries constrained to session organization; two-organization IDOR test pending | Parcial F1 |
+| FR-DASH-001 KPIs reales | Dashboard | navegación | Dashboard | Analytics/Activity/ApiUsage | TASK-FOUND-001, TASK-ANA-001 | Initial dashboard data is API-backed; KPI reconciliation/analytics pending | Parcial F1 |
 | FR-DISC-001 búsqueda | Discover | A | Discover | BusinessReference/IntegrationConnection | TASK-DISC-001/002 | provider contract mock; quota/error/paging | Planificado |
 | FR-DISC-002 retención | Discover/restricciones | A | Discover | BusinessReference/sourceRefs | TASK-DISC-001 | field retention policy test/expiry | Planificado |
 | FR-VER-001 evidencia | Verify | A | Verify | LeadVerification/LeadContact | TASK-VER-001 | absence stays uncertain; manual reviewer | Planificado |
@@ -32,9 +32,9 @@ Status inicial de todas las filas: **Planificado**. La columna Test describe evi
 | FR-PROJ-002 delivery/costs | Projects | G | Projects | Project/Task/ApiUsage | TASK-PROJ-002/003 | permissioned state, file limits, reconcile totals | Planificado |
 | FR-ANA-001 formulas | Analytics | navigation | Analytics/Dashboard | analytics endpoints | TASK-ANA-001/002 | cohort denominators reconcile, no-data state | Planificado |
 | FR-SET-001 integrations/secrets | Settings | H | Settings | IntegrationConnection/AppSetting | TASK-FOUND-002, TASK-OUT-001 | API never returns ciphertext/secret; revoke | Planificado |
-| FR-UI-001 bilingual/theme/accessibility | restricciones/UI | todos | Shell/Settings | User locale/AppSetting | TASK-UI-001 | locale persistence, keyboard, WCAG checks | Planificado |
-| FR-OPS-001 Docker/backup | TRD/ops | deployment | n/a | storage/DB | TASK-OPS-001/002 | Compose health and restore drill | Planificado |
-| FR-OBS-001 audit/usage | seguridad/metrics | todos | audit/costs | AuditLog/ApiUsage | TASK-OBS-001 | redaction scan, append-only policy, usage reconciliation | Planificado |
+| FR-UI-001 bilingual/theme/accessibility | restricciones/UI | todos | Shell/Settings | User locale/AppSetting | TASK-UI-001 | EN/ES, theme and protected shell implemented; keyboard/WCAG audit pending | Parcial F1 |
+| FR-OPS-001 Docker/backup | TRD/ops | deployment | n/a | storage/DB | TASK-OPS-001/002 | Compose config and runtime health checked; backup/restore drill pending | Parcial F1 |
+| FR-OBS-001 audit/usage | seguridad/metrics | todos | audit/costs | AuditLog/ApiUsage | TASK-OBS-001 | JSON logs, request IDs, audit actions implemented; usage reconciliation pending | Parcial F1 |
 
 ## Validación cruzada (10 controles)
 
@@ -51,10 +51,10 @@ Status inicial de todas las filas: **Planificado**. La columna Test describe evi
 
 ### Pendientes de decisión (no ocultar como contradicción resuelta)
 
-- DG-01: ratificar mercado EEUU, idioma inicial inglés, USD, servicios web locales y precios de referencia editables (Master Prompt).
-- DG-02: ratificar migración de npm workspaces existente a pnpm + Turborepo.
-- DG-03: aprobar paleta/logo descritos o suministrar referencia de marca; tokens actuales neutrales.
-- DG-04: ratificar organización interna única en MVP y preparación de aislamiento multi-org.
+- DG-01: mercado EEUU, idioma inicial inglés, USD, servicios web locales y precios de referencia editables — **aprobado 2026-11-12**.
+- DG-02: migración de npm workspaces existente a pnpm + Turborepo — **aprobado 2026-11-12**.
+- DG-03: paleta y dirección de logo descritos; aplicar validaciones de contraste — **aprobado 2026-11-12**.
+- DG-04: organización interna única en MVP y preparación de aislamiento multi-org — **aprobado 2026-11-12**.
 - DG-05: definir operador de hosting/backup y valores finales RPO/RTO/coste antes de prod.
 - DG-06: revisar términos vigentes, retención y habilitación de Google/Gmail/OpenAI y requisitos comerciales/legales antes de activar proveedores.
 - **Conflicto de orden en el Master Prompt:** la regla inicial de Fase 0 exige aprobación del propietario antes de implementar; su sección 33 pide empezar Fase 1 inmediatamente tras documentar. Se aplica la regla inicial explícita de aprobación, coherente también con el apartado 0.8 original; la sección 33 queda subordinada y no autoriza saltarse la aprobación.

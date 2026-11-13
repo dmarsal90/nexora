@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --noEmit --pretty"
+    "build": "tsc --noEmit --pretty",
+    "typecheck": "tsc --noEmit --pretty",
+    "lint": "tsc --noEmit --pretty"
   },
   "exports": {
     "./styles/tokens.css": "./styles/tokens.css",

@@ -1,17 +1,17 @@
 import { Button } from '@nexora/ui/components/primitives/button'
 import { useTheme } from '@nexora/ui/hooks/use-theme'
 
-export function ThemeToggle() {
+export function ThemeToggle({ label = 'Toggle color theme' }: { label?: string }) {
   const { theme, setPreference } = useTheme()
   const nextTheme = theme === 'dark' ? 'light' : 'dark'
 
   return (
     <Button
-      aria-label={`Cambiar a modo ${nextTheme === 'dark' ? 'oscuro' : 'claro'}`}
+      aria-label={label}
       aria-pressed={theme === 'dark'}
       onClick={() => setPreference(nextTheme)}
       size="icon"
-      title={`Cambiar a modo ${nextTheme === 'dark' ? 'oscuro' : 'claro'}`}
+      title={label}
       variant="outline"
     >
       {theme === 'dark' ? (

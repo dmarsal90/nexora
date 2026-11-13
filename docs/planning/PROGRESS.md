@@ -36,7 +36,7 @@
 | TASK-OPS-001 | Completado | Compose, Nginx, Mongo replica set con auth/keyfile, Redis con clave y secretos fuera de imágenes/repositorio. |
 | TASK-OBS-001 | Completado | Logs JSON estructurados, correlación y health/readiness. |
 | PHASE-1-VERIFY-001 | Completado | `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build`, Compose config, `git diff --check`; MongoDB/Redis/API/worker/web/Nginx saludables; HTTP web/readiness 200 y API administrativa anónima 401. |
-| PHASE-1-PR-001 | En progreso | Commit/PR apilado pendientes de publicación. |
+| PHASE-1-PR-001 | Completado | Commit `0ddd248`; PR [#6](https://github.com/dmarsal90/nexora/pull/6), apilado sobre el PR #5 de Fase 0. |
 
 ## Pruebas y límites registrados
 
